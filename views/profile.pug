@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  .jumbotron
+    p.lead Hi #{currentUserName}!
+    if !userSnippets
+      h1.display-4 You have no saved snippets!
+    if userSnippets
+      p.display-4 Here are your snippets!
+      hr.my-4
+      each val, index in userSnippets
+        pre
+          h3.underLined= val.title
+          code= val.body
+          hr.-my-4
+          a.nav-item.nav-link(href=`edit/${val.authorId}`) Edit Snippet
+          a.nav-item.nav-link(href=`delete/${val.authorId}`) Delete Snippet
+          hr.my-4
+    

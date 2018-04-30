@@ -1,0 +1,22 @@
+extends layout
+
+block content
+      .jumbotron
+        form.form-horizontal(action='/login', method='POST')
+          .fieldset
+            #legend
+              p.lead.headline Login to your SnippetBase account!
+            .control-group
+              // Username
+              label.control-label(for='username') 
+              .controls
+                input#username.input-xlarge(type='text', name='username', placeholder='username')
+            .control-group
+              // Password
+              label.control-label(for='password') 
+              .controls
+                input#password.input-xlarge(type='password', name='password', placeholder='Password')
+            .control-group
+              // Button
+              .controls
+                button.btn.btn-primary(type='submit') Login
