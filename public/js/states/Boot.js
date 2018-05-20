@@ -11,16 +11,30 @@ KnightRunner.BootState = {
 
     // physics system
     this.game.physics.startSystem(Phaser.Physics.ARCADE)
+    this.style = {font: '30px Press Start 2P', fill: '#fff'}
+    this.cursors = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
   },
   preload: function () {
     // assets we'll use in the loading screen
     this.load.image('preloadbar', 'assets/images/preloader-bar.png')
     this.load.image('background', 'assets/images/medievalVillage/bg_mountains_and_sky.png')
+    this.load.image('ground', 'assets/images/medievalVillage/terrain_top_center_A_full.png')
+    this.load.atlasJSONHash('knight', 'assets/images/valiantKnight/ValiantKnight-all.png', 'assets/images/valiantKnight/ValiantKnight-all.json')
+    
   },
   create: function () {
     this.background = this.add.tileSprite(0, 0, this.game.world.width, this.game.world.height, 'background')
+    this.ground = this.add.tileSprite(0, this.game.world.height - 48, this.game.world.width, 48, 'ground')
+    
     this.background.tileScale.y = 1
     this.background.autoScroll(-40, 0)
+    this.ground.autoScroll(-60, 0)
+
+    this.knight = this.add.sprite(100, this.game.world.height - 35, 'knight')
+    this.knight.anchor.setTo(0.5, 1)
+    this.knight.animations.add('running', Phaser.Animation.generateFrameNames('run', 0, 7, '.png', 4), 15, true, false)
+    this.knight.animations.play('running')
+    
 
     this.gameStart()
   },
@@ -40,13 +54,15 @@ KnightRunner.BootState = {
 
     // Stop all movement after overlay reeaches top
     startPanelTween.onComplete.add(function () {
-      let style = {font: '30px Arial', fill: '#fff'}
-      this.add.text(this.game.width / 2, this.game.height / 2, 'Knight Runner', style).anchor.setTo(0.5)
+      this.add.text(this.game.width / 2, this.game.height / 2, 'Knight Runner', this.style).anchor.setTo(0.5)
+      this.style = {font: '8px Press Start 2P', fill: '#fff'}
+      this.add.text(780, this.game.height / 2 + 100, 'Press Up key to jump', this.style).anchor.setTo(0.5)
+      this.add.text(800, this.game.height / 2 + 80, 'Press Right key to attack', this.style).anchor.setTo(0.5)
 
-      style = {font: '10px Arial', fill: '#fff'}
-      this.add.text(this.game.width / 2, this.game.height / 2 + 50, 'Click to play!', style).anchor.setTo(0.5)
+      this.style = {font: '15px Press Start 2P', fill: '#fff'}
+      this.add.text(this.game.width / 2, this.game.height / 2 + 40, 'Press spacebar to play!', this.style).anchor.setTo(0.5)
 
-      this.game.input.onDown.addOnce(this.startGame, this)
+      this.cursors.onDown.addOnce(this.startGame, this)
     }, this)
 
     startPanelTween.start()

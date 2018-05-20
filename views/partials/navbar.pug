@@ -1,16 +1,20 @@
 nav.navbar.navbar-expand-lg.navbar-light.bg-light
-  a.navbar-brand(href='/') SoftwareProject Template
+  a.navbar-brand(href='/') KnightRunner
   button.navbar-toggler(type='button', data-toggle='collapse', data-target='#navbarNavAltMarkup', aria-controls='navbarNavAltMarkup', aria-expanded='false', aria-label='Toggle navigation')
     span.navbar-toggler-icon
   #navbarNavAltMarkup.collapse.navbar-collapse
     .navbar-nav
-      a.nav-item.nav-link.active(href='/')
-        | Home 
+      a.nav-item.nav-link.active(href='/highScores')
+        | High Score List
         span.sr-only (current)
-      a.nav-item.nav-link(href='/game') Game
-      a.nav-item.nav-link(href='/profile') Profile: 
-      a.nav-item.nav-link(href='/register') Sign up
-      a.nav-item.nav-link(href='/logout') Log out
-      a.nav-item.nav-link(href='/login') Log in
+      a.nav-item.nav-link(href='/game') Play KnightRunner
+      if currentUser
+        a.nav-item.nav-link(href='/profile') Profile: #{currentUserName}
+      if !currentUser
+        a.nav-item.nav-link(href='/register') Sign up
+      if currentUser
+        a.nav-item.nav-link(href='/logout') Log out
+      else
+        a.nav-item.nav-link(href='/login') Log in
 
       

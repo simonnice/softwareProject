@@ -10,6 +10,16 @@ router.get('/', function (req, res, next) {
 
 // Adding POST route for Register when adding user
 router.post('/', function (req, res, next) {
+
+
+  if (req.body.username === undefined || req.body.email === undefined || req.body.password === undefined || req.body.confirmPassword === undefined) {
+    console.log('Body is empty')
+    let err = new Error('No request body')
+    err.status = 401
+    return next(err)
+  }
+
+  
   // Using express validator to check if fields are filled in
   req.checkBody('email', 'Email is required!').notEmpty()
   req.checkBody('username', 'User name is required!').notEmpty()
@@ -28,12 +38,15 @@ router.post('/', function (req, res, next) {
   // Check for if passwords match
   if (req.body.password !== req.body.confirmPassword) {
     let err = new Error('Passwords do not match!')
+    console.log('In password match')
+    console.log(err.message)
     err.status = 400
     return next(err)
   }
   // Regex check for valid email
   if (!/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(req.body.email)) {
     let err = new Error('Invalid email!')
+    console.log('In invalid email')
     err.status = 400
     return next(err)
   }
@@ -50,7 +63,7 @@ router.post('/', function (req, res, next) {
   // Redirecting to profile page when successful.
   User.create(userData, function (error, user) {
     if (error) {
-      error = new Error('A user with that username or email already exists.')
+      error = new Error("A user with that username or email already exists.")
       error.status = 400
       return next(error)
     } else {

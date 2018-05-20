@@ -9,6 +9,14 @@ router.get('/', function (req, res, next) {
 
 // Adding POST route for passing user credentials for logging in.
 router.post('/', function (req, res, next) {
+
+  if (req.body.username === undefined || req.body.password === undefined) {
+    console.log('Body is empty')
+    let err = new Error('No request body')
+    err.status = 401
+    return next(err)
+  } 
+
   // First we check if email and password is filled in.
   req.checkBody('username', 'User name is required!').notEmpty()
   req.checkBody('password', 'Password is required!').notEmpty()
@@ -26,13 +34,14 @@ router.post('/', function (req, res, next) {
   User.authenticate(req.body.username, req.body.password, function (error, user) {
     // If error or not a legit user we pass an error
     if (error || !user) {
-      let err = new Error('Wrong email or password.')
+      let err = new Error('Wrong username or password.')
       err.status = 401
       return next(err)
       // else we set the sessions userID to match the _id of the mongo user
     } else {
       req.session.userId = user._id
       req.session.userName = user.name
+      console.log('Logged in test')
       req.flash('Success', `You are logged in as ${req.session.userName}`)
       return res.redirect('/profile')
     }

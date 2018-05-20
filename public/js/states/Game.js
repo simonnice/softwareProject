@@ -9,30 +9,35 @@ KnightRunner.GameState = {
     // Pool of platforms
     this.platformPool = this.add.group()
 
-    // pool of coins
-    this.coinsPool = this.add.group()
-    this.coinsPool.enableBody = true
-
     // pool of enemies
     this.enemyPool = this.add.group()
     this.enemyPool.enableBody = true
 
     // gravity
-    this.game.physics.arcade.gravity.y = 1200
+   // this.game.physics.arcade.gravity.y = 1500
 
     // max jump distance
     this.maxJumpDistance = 120
 
     // Move player with keyboard
     this.cursors = this.game.input.keyboard.createCursorKeys()
-
-    // coins
-    this.myCoins = 0
+    this.spaceBar = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
 
     // Speed level
-    this.levelSpeed = 250
+    this.levelSpeed = 400
 
-    this.total = 1
+    // Max speed
+    this.maxSpeed = 1000
+
+    // Counting time alive
+
+    this.counter = 0
+
+    // Ways to die
+    this.skeletonDeath = false
+    this.fallDeath = false
+
+    
   },
   create: function () {
     // Moving background
@@ -42,7 +47,7 @@ KnightRunner.GameState = {
     this.game.world.sendToBack(this.background)
 
     // Create the player
-    this.knight = this.add.sprite(100, 50, 'knight')
+    this.knight = this.add.sprite(100, 215, 'knight')
     this.knight.anchor.setTo(0.5, 1)
 
     // Creating hitboxes for the knight animations, attack
@@ -64,69 +69,78 @@ KnightRunner.GameState = {
 
     this.game.physics.arcade.enable(this.knight)
     this.game.physics.arcade.enable(this.hitbox1)
+    
 
     // Change player bounding box
-    this.knight.body.setSize(45, 50, -10, 8)
+    this.knight.body.setSize(45, 50, -5, 10)
     this.knight.play('running')
+    this.knight.body.bounce.y = 0.2
+    this.knight.body.gravity.y = 2200
 
+    // First enemy free platform
+    this.starterPlatform = this.add.tileSprite(5, this.game.world.height - 100, 450, 100, 'newGround' )
+    this.game.physics.arcade.enable(this.starterPlatform)
+    this.starterPlatform.body.immovable = true
+    
+    
     // hard-code first platform
-    this.currentPlatform = new KnightRunner.Platform(this.game, this.floorPool, 20, 0, 200, -this.levelSpeed, this.coinsPool, this.enemyPool)
+    this.currentPlatform = new KnightRunner.Platform(this.game, this.floorPool, 20, 450, this.game.world.height - 100, -this.levelSpeed, this.enemyPool)
     this.platformPool.add(this.currentPlatform)
 
-    // Coin sound
-    this.coinSound = this.add.audio('coinSound')
+    // Adding attack
+    this.attackSound = this.add.audio('attackSound')
+    this.attackSound.volume = 0.3
+
+    // Background Music
+
+    this.music = this.game.add.audio('backgroundMusic')
+    this.music.volume = 0.2
+    this.music.loop = true // This is what you are lookig for
+    this.music.play()
+   
+   
 
     this.loadLevel()
 
     this.disableAllHitboxes()
 
     // Show number of coins
-    let style = {font: '30px Arial', fill: '#fff'}
-    this.coinsCountLabel = this.add.text(10, 20, '0', style)
+    let style = {font: '15px Arial', fill: '#fff'}
+   
 
-    // Create TImer
-    this.timerLabel = this.add.text(10, 60, '0', style)
-    this.timer = this.time.create(false)
-    this.timer.loop(10000, this.updateCounter, this)
+    // Timer for counting High Score
+    this.timer = this.game.time.create(false)
+    this.timer.loop(250, this.updateCounter, this)
+    this.timerLabel = this.add.text(10, 20, '0', style)
     this.timer.start()
 
-    if (this.total < 20) {
-      this.levelSpeed += 5
-      this.timerLabel.text = this.total
-    }
+    this.barrels = this.game.add.group()
+ 
+
+    //this.makeBarrels()
+
+    
   },
 
   update: function () {
-    if (this.knight.body.touching.down) {
-      this.knight.body.velocity.x = this.levelSpeed
-      this.hitbox1.body.velocity.x = this.knight.body.velocity.x - this.levelSpeed
-    } else {
-      this.knight.body.velocity.x = 0
-      this.hitbox1.body.velocity.x = this.knight.body.velocity.x
-    }
+    
+    
     if (this.knight.alive) {
     // Iterating through alive platforms to add collision
       this.platformPool.forEachAlive(function (platform, index) {
         this.game.physics.arcade.collide(this.knight, platform, this.onGround, null, this)
-
+        this.game.physics.arcade.collide(this.barrels, platform)
+        for (let i = 0 ; i < platform.children.length; i++) {
+          platform.children[i].body.velocity.x = -this.levelSpeed
+        }
         // Check if a platform needs to be killed
         if (platform.length && platform.children[platform.length - 1].right < 0) {
           platform.kill()
         }
       }, this)
 
-      console.log(this.levelSpeed)
-      console.log(this.total)
-
-      this.game.physics.arcade.collide(this.hitbox1, this.enemyPool, this.hitEnemy, null, this)
-      this.game.physics.arcade.overlap(this.knight, this.coinsPool, this.collectCoin, null, this)
-      // this.game.physics.arcade.collide(this.knight, this.enemyPool, this.jumpEnemy, null, this)
-
-      // kill coins that leave the screen
-      this.coinsPool.forEachAlive(function (coin) { if (coin.right <= 0) { coin.kill() } }, this)
-
-      // kill enemies that leave the screen
-      this.enemyPool.forEachAlive(function (enemy) { if (enemy.right <= 0) { enemy.kill() } }, this)
+      this.starterPlatform.body.velocity.x = -this.levelSpeed
+      this.game.physics.arcade.collide(this.knight, this.starterPlatform, this.onGround, null, this)
 
       if (this.knight.body.touching.down) {
         this.knight.body.velocity.x = this.levelSpeed
@@ -136,37 +150,79 @@ KnightRunner.GameState = {
         this.hitbox1.body.velocity.x = this.knight.body.velocity.x
       }
 
+    
+
+      //this.game.physics.arcade.collide(this.knight, this.barrels)velocity.x
+      //this.game.physics.arcade.collide(this.barrels)
+      this.game.physics.arcade.collide(this.hitbox1, this.enemyPool, this.hitEnemy, null, this)
+      this.game.physics.arcade.collide(this.knight, this.enemyPool, this.jumpEnemy, null, this)
+      
+
+      // kill enemies that leave the screen
+      this.enemyPool.forEachAlive(function (enemy) { if (enemy.right <= 0) { enemy.kill() } }, this)
+
+
       if (this.cursors.left.isDown) {
         this.knight.play('blocking')
       }
 
-      if (this.cursors.right.downDuration(140)) {
-        this.knight.play('attacking')
-        this.enableHitBox()
-        this.time.events.add(Phaser.Timer.SECOND * 0.3, this.disableAllHitboxes, this)
-      }
 
       if (this.cursors.up.isDown || this.game.input.activePointer.isDown) {
         this.knightJump()
       } else if (this.cursors.up.isUp || this.game.input.activePointer.isUp) {
         this.isJumping = false
+        if (this.cursors.right.downDuration(140)) {
+          this.knight.play('attacking')
+          this.attackSound.play()
+          this.enableHitBox()
+          this.time.events.add(Phaser.Timer.SECOND * 0.3, this.disableAllHitboxes, this)
+        }
       }
 
       if (this.currentPlatform.length && this.currentPlatform.children[this.currentPlatform.length - 1].right < this.game.world.width) {
+        this.increaseLevelSpeed()
         this.createPlatform()
       }
 
       // Check if player needs to die
       if (this.knight.top >= this.game.world.height || this.knight.left <= 0) {
+        this.fallDeath = true
         this.gameOver()
       }
+
+      /*let fChild = this.barrels.getChildAt(0)
+      if (fChild.x < -this.game.width){
+        this.makeBarrels()
+      }*/
     }
   },
 
-  updateCounter: function () {
-    this.total++
-    this.levelSpeed += 20
+  makeBarrels: function() {
+    this.barrels.removeAll()
+    let wallHeight = this.game.rnd.integerInRange(1, 2)
+    for (let i = 0; i < wallHeight; i++) {
+      let barrel = this.game.add.sprite(0, -i * 64, 'barrel')
+      this.barrels.add(barrel)
+    }
+    this.barrels.x = this.game.width
+    this.barrels.y = this.game.height - 250
+    let that = this.game
+    this.barrels.forEach(function(barrel) {
+      that.physics.arcade.enable(barrel)
+      barrel.body.velocity.x = -this.levelSpeed
+      barrel.body.gravity.y = 200
+      
+      
+      
+    })
   },
+
+  updateCounter: function () {
+    this.counter++
+    this.timerLabel.text = this.counter + 'm'
+    },
+    
+  
 
   enableHitBox: function () {
     for (let i = 0; i < this.hitboxes.children.length; i++) {
@@ -177,7 +233,18 @@ KnightRunner.GameState = {
   },
 
   increaseLevelSpeed: function () {
-    this.levelSpeed += 5
+    this.levelSpeed += 15
+    console.log(this.levelSpeed)
+    if (this.levelSpeed > 450) {
+      this.knight.animations.getAnimation('running').delay = 25
+    }
+    else if(this.levelSpeed > 500) {
+      this.knight.animations.getAnimation('running').delay = 30
+    } else if (this.levelSpeed > 700) {
+      this.knight.animations.getAnimation('running').delay = 45
+    } else if (this.levelSpeed > 1000) {
+      this.knight.animations.getAnimation('running').delay = 60
+    }
   },
 
   disableAllHitboxes: function () {
@@ -224,7 +291,14 @@ KnightRunner.GameState = {
   // Debugging
   render: function () {
     this.game.debug.body(this.knight)
-    this.game.debug.body(this.hitbox1)
+    this.game.debug.body(this.hitbox1) 
+    this.enemyPool.forEachAlive(this.renderGroup, this)
+    this.game.debug.soundInfo(this.attackSound)
+    
+  },
+
+  renderGroup: function (member){
+    this.game.debug.body(member)
   },
 
   makeArray: function (start, end) {
@@ -247,7 +321,7 @@ KnightRunner.GameState = {
       if (!this.currentPlatform) {
         this.currentPlatform = new KnightRunner.Platform(this.game, this.floorPool, nextPlatformData.numTiles,
           this.game.world.width + nextPlatformData.separation,
-          nextPlatformData.y, -this.levelSpeed, this.coinsPool, this.enemyPool)
+          nextPlatformData.y, -this.levelSpeed, this.enemyPool)
         // If
       } else {
         this.currentPlatform.prepare(nextPlatformData.numTiles,
@@ -262,50 +336,48 @@ KnightRunner.GameState = {
     let data = {}
 
     // Distance from previous platform
-    let minSeparation = 60
-    let maxSeparation = 200
+    let minSeparation = 150
+    let maxSeparation = 360
     data.separation = minSeparation + Math.random() * (maxSeparation - minSeparation)
-
-    // y in regards to previous platform
-    let minDifferenceY = -120
-    let maxDifferenceY = 120
-    data.y = this.currentPlatform.children[0].y + minDifferenceY + Math.random() * (maxDifferenceY - minDifferenceY)
-    data.y = Math.max(150, data.y)
-    data.y = Math.min(this.game.world.height - 50, data.y)
+    let rndValue = Math.floor(Math.random() * ( 160 - 30 + 1)) + 30
+   
+    data.y = this.game.world.height - rndValue
 
     // number of tiles
-    let minTiles = 12
-    let maxTiles = 20
+    let minTiles = 15
+    let maxTiles = 30
     data.numTiles = minTiles + Math.random() * (maxTiles - minTiles)
 
     return data
   },
-  collectCoin: function (knight, coin) {
-    coin.kill()
-    this.myCoins++
-    this.coinSound.play()
-    this.coinsCountLabel.text = this.myCoins
-  },
-
+ 
   jumpEnemy: function (knight, enemy) {
     if (enemy.body.touching.up) {
-      enemy.kill()
+      enemy.play('dying')
+      enemy.events.onAnimationComplete.add(function(){
+          enemy.kill()
+      }, this)
       console.log('Killed by jumping on head')
     } else {
       this.gameOver()
     }
   },
 
+
   hitEnemy: function (hitbox, enemy) {
+    enemy.body.setSize(0, 0, 0, 0)
     enemy.play('dying')
-    enemy.kill()
+    enemy.events.onAnimationComplete.add(function(){
+        enemy.kill()
+    }, this)
+     
     console.log('Killed by hitEnemy')
   },
 
   gameOver: function () {
     this.knight.kill()
     this.updateHighscore()
-    console.log(this.knight.frame)
+    
 
     // Game over overlay
     this.overlay = this.add.bitmapData(this.game.width, this.game.height)
@@ -322,25 +394,38 @@ KnightRunner.GameState = {
 
     // Stop all movement after overlay reeaches top
     gameOverPanel.onComplete.add(function () {
+      this.timer.stop()
       this.background.stopScroll()
 
-      let style = {font: '30px Arial', fill: '#fff'}
+      let style = {font: '30px Press Start 2P', fill: '#fff'}
       this.add.text(this.game.width / 2, this.game.height / 2, 'GAME OVER', style).anchor.setTo(0.5)
 
-      style = {font: '20px Arial', fill: '#fff'}
-      this.add.text(this.game.width / 2, this.game.height / 2 + 50, 'High score:' + this.highScore, style).anchor.setTo(0.5)
+      if(this.fallDeath === true) {
+        style = {font: '20px Press Start 2P', fill: '#fff'}
+        this.add.text(this.game.width / 2, this.game.height / 2 + 50, 'You fell to a gruesome death!', style).anchor.setTo(0.5)
+      } else {
+        style = {font: '20px Press Start 2P', fill: '#fff'}
+        this.add.text(this.game.width / 2, this.game.height / 2 + 50, 'Sliced in twain by a skeleton!!', style).anchor.setTo(0.5)
+      }
 
-      this.add.text(this.game.width / 2, this.game.height / 2 + 80, 'Your score:' + this.myCoins, style).anchor.setTo(0.5)
+      style = {font: '15px Press Start 2P', fill: '#fff'}
+      this.add.text(this.game.width / 2, this.game.height / 2 + 80, 'High score:' + this.highScore, style).anchor.setTo(0.5)
 
-      style = {font: '10px Arial', fill: '#fff'}
-      this.add.text(this.game.width / 2, this.game.height / 2 + 120, 'Tap to play again', style).anchor.setTo(0.5)
+      this.add.text(this.game.width / 2, this.game.height / 2 + 100, 'Your score:' + this.counter, style).anchor.setTo(0.5)
 
-      this.game.input.onDown.addOnce(this.restart, this)
+      style = {font: '10px Press Start 2P', fill: '#fff'}
+      this.add.text(this.game.width / 2, this.game.height / 2 + 140, 'Press space to play again', style).anchor.setTo(0.5)
+
+      this.spaceBar.onDown.addOnce(this.restart, this)
+      this.updateHighscore()
+      this.submitScore(this.counter)
+
     }, this)
 
     gameOverPanel.start()
   },
   restart: function () {
+    this.music.stop()
     this.game.state.start('Game')
   },
 
@@ -348,10 +433,30 @@ KnightRunner.GameState = {
     this.highScore = +window.localStorage.getItem('highScore')
 
     // Do we have a new high score
-    if (this.highScore < this.myCoins) {
-      this.highScore = this.myCoins
+    if (this.highScore < this.counter) {
+      this.highScore = this.counter
 
       window.localStorage.setItem('highScore', this.highScore)
+
+      
     }
+  },
+
+  submitScore: function (score, callback) {
+    $.post("http://localhost:3000/submitScore", {score:score}, function(data) {
+      if(!data) {
+        console.log("Server error")
+        callback && callback(false)
+        return
+      }
+      
+      if(data.error) {
+        console.log("Server Error " + data.error)
+        callback && callback(false)
+        return
+      }
+
+      callback && callback(true)
+    })
   }
 }

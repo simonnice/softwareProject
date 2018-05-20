@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css?family=Press+Start+2P');
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+body {
+    font-family: 'Press Start 2P', cursive;
+    border: solid white 10px;
+    
+}
+
+
+h2 {
+    font-family: 'Roboto', bold;
+    font-size: 30px;
+    margin-top: 20px;
+}
+
+p {
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+}
+
+.fontPreload {
+    font-family: 'Press Start 2P', cursive;
+    position: absolute;
+    left: -100px;
+}
+
+
+.navbar-nav {
+    font-family: 'Roboto', sans-serif;
+    margin: auto;
+    width: 50%;
+    
+}
+
+.navbar-brand {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 30px;
+    
+}
+
+.navbar-light .navbar-brand {
+    color: black;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: black;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.headingCarousel {
+    font-family: 'Press Start 2P', cursive;
+    color: gray;
+    font-size: 40px;
+
+}
+
+.carousel-item {
+    height: 65vh;
+    min-height: 300px;
+    background: no-repeat center center scroll;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+  }
+
+.row {
+    margin-top: 20px;
+}
+
+.featurette-divider {
+    margin-top: 50px;
+}
+
+.control-group {
+    font-family: 'Roboto', sans-serif;
+}
+
+.highScoreTitle {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 70px;
+    text-align: center;
+}
+
+.player {
+    font-family: 'Press Start 2P' cursive;
+    font-size: 25px;
+    text-align: left;
+    margin-left: 300px;
+}
+
+.playerTitle {
+    font-family: 'Press Start 2P' cursive;
+    font-size: 35px;
+    text-align: left;
+    margin-left: 300px;
+}
+
+.playerScore{
+    font-family: 'Press Start 2P' cursive;
+    font-size: 35px;
+    text-align: right;
+    margin-right: 325px;
+    margin-top: -45px;
+}
+
+.highScoreScore{
+    font-family: 'Press Start 2P' cursive;
+    font-size: 25px;
+    text-align: right;
+    margin-right: 325px;
+    margin-top: -45px;
+}
+
+.profileScore {
+    font-family: 'Press Start 2P' cursive;
+    font-size: 50px;
+    text-align: center;
+}
+
+.profile {
+    font-family: 'Press Start 2P' cursive;
+    font-size: 25px;
+}
+
+.lead p {
+    font-family: 'Press Start 2P' cursive;
+    font-size: 25px;
+}
+
+#gameContainer {
+    background-color: #e9ecef;
+    border-radius: .3rem;
+    height: 500px;
+    padding: 10px;
+}
+

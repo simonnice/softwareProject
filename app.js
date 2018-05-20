@@ -83,6 +83,8 @@ let loginRoute = require('./routes/login')
 let logoutRoute = require('./routes/logout')
 let gameRoute = require('./routes/game')
 let registerRoute = require('./routes/register')
+let submitScoreRoute = require('./routes/submitScore')
+let highScoresRoute = require('./routes/highScores')
 
 // Use routes
 app.use('/', routes)
@@ -90,6 +92,8 @@ app.use('/game', gameRoute)
 app.use('/register', registerRoute)
 app.use('/login', loginRoute)
 app.use('/logout', logoutRoute)
+app.use('/submitScore', submitScoreRoute)
+app.use('/highScores', highScoresRoute)
 
 // Adding 404 error catcher
 app.use(function (req, res, next) {
@@ -100,7 +104,9 @@ app.use(function (req, res, next) {
 
 // 500 general error catcher
 app.use(function (err, req, res, next) {
-  res.status(err.status || 500)
+  res.status(err.status || 500).json({
+    error: err.message
+  })
   res.render('error', {
     message: err.message,
     error: {}

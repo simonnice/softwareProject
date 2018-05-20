@@ -1,0 +1,17 @@
+extends layout
+
+block content
+ .jumbotron
+  if !highScoreList
+      h1.display-4 High Score is currently empty!
+  p.lead
+
+  if highScoreList
+      .highScoreTitle High Scores
+      .playerTitle Player
+      .playerScore Score
+      hr.my-4
+      each val , index in highScoreList
+        .player=`${val.user}`
+        .highScoreScore=`${val.score}m`
+        hr.my-4

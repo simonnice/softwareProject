@@ -1,19 +1,26 @@
-doctype html
-html
-  head
-    meta(charset='utf-8')
-    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no')
-    title Learn Game Development at ZENVA.com
-    style.
-      body {
-      background-color: black;
-      padding: 0px;
-      margin: 0px;
-      }
-  body
-    script(type='text/javascript', src='js/phaser.js')
-    script(type='text/javascript', src='js/states/Boot.js')
-    script(type='text/javascript', src='js/states/Preload.js')
-    script(type='text/javascript', src='js/states/Game.js')
-    script(type='text/javascript', src='js/prefabs/Platform.js')
-    script(src='js/main.js')
+extends layout
+
+block content
+  doctype html
+  html
+    head
+        meta(charset='utf-8')
+        meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no')
+        link(rel='stylesheet', href='css/styles.css')
+        link(href='https://fonts.googleapis.com/css?family=Press+Start+2P', rel='stylesheet')
+        title KnightRunner
+        style.
+          body {
+          padding: 0px;
+          margin: 0px;
+          }
+    body
+        #gameContainer
+            .frontPreload
+            script(src='https://code.jquery.com/jquery-3.3.1.min.js', integrity='sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=', crossorigin='anonymous')
+            script(type='text/javascript', src='js/phaser.js')
+            script(type='text/javascript', src='js/states/Boot.js')
+            script(type='text/javascript', src='js/states/Preload.js')
+            script(type='text/javascript', src='js/states/Game.js')
+            script(type='text/javascript', src='js/prefabs/Platform.js')
+            script(src='js/main.js')

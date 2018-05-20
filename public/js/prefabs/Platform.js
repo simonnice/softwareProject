@@ -1,13 +1,12 @@
 var KnightRunner = KnightRunner || {}
 
-KnightRunner.Platform = function (game, floorPool, numTiles, x, y, speed, coinsPool, enemyPool) {
+KnightRunner.Platform = function (game, floorPool, numTiles, x, y, speed, enemyPool) {
   Phaser.Group.call(this, game)
 
   this.tileSize = 32
   this.game = game
   this.enableBody = true
   this.floorPool = floorPool
-  this.coinsPool = coinsPool
   this.enemyPool = enemyPool
   this.speed = speed
 
@@ -26,7 +25,8 @@ KnightRunner.Platform.prototype.prepare = function (numTiles, x, y, speed) {
     let floorTile = this.floorPool.getFirstExists(false)
 
     if (!floorTile) {
-      floorTile = new Phaser.Sprite(this.game, x + i * this.tileSize, y, 'floor')
+      floorTile = new Phaser.Sprite(this.game, x + i * this.tileSize, y, 'newGround')
+      
     } else {
       floorTile.reset(x + i * this.tileSize, y)
     }
@@ -41,7 +41,6 @@ KnightRunner.Platform.prototype.prepare = function (numTiles, x, y, speed) {
   this.setAll('body.allowGravity', false)
   this.setAll('body.velocity.x', speed)
 
-  this.addCoins(speed)
   this.addEnemy(speed)
 }
 
@@ -59,28 +58,6 @@ KnightRunner.Platform.prototype.kill = function () {
   }, this)
 }
 
-KnightRunner.Platform.prototype.addCoins = function (speed) {
-  let coinsY = 90 + Math.random() * 110
-  let hasCoin
-  this.forEach(function (tile) {
-    // 40% chance
-    hasCoin = Math.random() <= 0.01
-
-    if (hasCoin) {
-      let coin = this.coinsPool.getFirstExists(false)
-
-      if (!coin) {
-        coin = new Phaser.Sprite(this.game, tile.x, tile.y - coinsY, 'coin')
-        this.coinsPool.add(coin)
-      } else {
-        coin.reset(tile.x, tile.y - coinsY)
-      }
-
-      coin.body.velocity.x = speed
-      coin.body.allowGravity = false
-    }
-  }, this)
-}
 
 KnightRunner.Platform.prototype.addEnemy = function (speed) {
   let hasEnemy
@@ -97,7 +74,7 @@ KnightRunner.Platform.prototype.addEnemy = function (speed) {
         enemy.anchor.setTo(0.5, 0.5)
         enemy.scale.x *= -1
         enemy.animations.add('attacking', Phaser.Animation.generateFrameNames('attack', 1, 19, '.png', 4), 15, true, false)
-        enemy.animations.add('dying', Phaser.Animation.generateFrameNames('die', 1, 20, '.png', 4), 30, false, false)
+        enemy.animations.add('dying', Phaser.Animation.generateFrameNames('die', 1, 20, '.png', 4), 80, false, false)
         enemy.animations.play('attacking')
         this.enemyPool.add(enemy)
       } else {
@@ -105,6 +82,7 @@ KnightRunner.Platform.prototype.addEnemy = function (speed) {
         enemy.animations.play('attacking')
       }
       this.game.physics.arcade.enable(enemy)
+      enemy.body.setSize(45, 50, -5, 10)
       enemy.body.velocity.x = speed
       enemy.body.allowGravity = false
     }
